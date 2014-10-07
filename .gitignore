@@ -1,4 +1,10 @@
+/data
+
 /tlusty/*
 !/tlusty/t205*.f
 !/tlusty/data
 !/tlusty/*.FOR
+
+/plots/*
+!/plots/*.asy
+!/plots/*.py
