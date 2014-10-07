@@ -1,0 +1,4 @@
+/tlusty/*
+!/tlusty/t205*.f
+!/tlusty/data
+!/tlusty/*.FOR
