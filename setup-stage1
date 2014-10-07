@@ -1,0 +1,76 @@
+#!/usr/bin/perl
+use File::Basename;
+use File::Path;
+use File::Copy;
+use Cwd 'abs_path';
+
+if ($#ARGV != 1) { die("setup: spin luminosity"); }
+
+my $spin  = $ARGV[0];
+my $lum   = $ARGV[1];
+my $alpha = 0.100;
+my $rmax  = 2000.0;
+my $nrings = 100;
+
+print "# spin    = $spin\n";
+print "# lum     = $lum\n";
+print "# alpha   = $alpha\n";
+print "# rmax    = $rmax\n";
+print "# N-rings = $nrings\n";
+
+my $base_dir = sprintf("a%03.0f/l%03.0f", $spin*1000, $lum*100);
+my $tlusty_dir = 'tlusty';                 # folder with tlusty 
+my $radial_dir = 'disk-model-sd';          # folder with radial model
+
+if (-e $base_dir) { die("Base directory exists, choose a new one!"); }
+if (!(-e $tlusty_dir)) { die("Tluty directory does not exists!"); }
+
+# make $base_dir folder and model index file
+mkpath($base_dir);
+system("(cd $radial_dir; ./radial-model $spin $lum $alpha $rmax $nrings) > $base_dir/index.dat");
+
+# open index file for reading
+open(my $fh, '<', "$base_dir/index.dat")
+    or die("cannot open < radial model : $!");
+
+
+while (<$fh>) {
+    ($N, $R, $T, $S, $Q, $H, $L, $V) = split(/\s+/);
+
+    # make folder     
+    $path = sprintf("%s/%04d", $base_dir, $N);
+    mkpath("$path");
+    mkpath("$path/stage1");
+
+    # copy setup file in
+    symlink(abs_path("$tlusty_dir/t205"), "$path/stage1/t205");
+    symlink(abs_path("$tlusty_dir/t205-atomicdata"), "$path/stage1/t205-atomicdata");
+    symlink(abs_path("$tlusty_dir/t205-options"), "$path/stage1/t205-options");
+    symlink(abs_path("$tlusty_dir/data"), "$path/stage1/data");
+    for $f (glob "$tlusty_dir/*.FOR") { copy($f, "$path/stage1") };
+
+    system("echo $N > $path/param-id");
+    system("echo $R > $path/param-R");
+    system("echo $T > $path/param-T");
+    system("echo $S > $path/param-S");
+    system("echo $Q > $path/param-Q");
+    system("echo $H > $path/param-H");
+    
+    system("rm -f $path/params");
+    system("echo 'ring-id=$N' >> $path/params");
+    system("echo 'radius=$R' >> $path/params");
+    system("echo 'temp=$T' >> $path/params");
+    system("echo 'sigma=$S' >> $path/params");
+    system("echo 'gravity=$Q' >> $path/params");
+    system("echo 'height=$H' >> $path/params");
+    system("echo 'angmom=$L' >> $path/params");
+    system("echo 'radvel=$V' >> $path/params");
+
+    symlink(abs_path("./ring-result"), "$path/stage1/ring-result");
+    symlink(abs_path("./ring-st1-calc-lte"), "$path/stage1/ring-st1-calc-lte");
+#    #symlink(abs_path("./ring-st2-lteg"), "$path/ring-stage2-lteg");
+}
+
+close($fh);
+
+

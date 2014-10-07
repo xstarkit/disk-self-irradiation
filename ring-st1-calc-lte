@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# --- set working directory either
+# choose either dir given as argument or the script's home directory
+DIR=$(dirname "$0")
+if [ "$1" != "" ]; then DIR=$1; fi
+
+# --- test if directory exists and if it contains TLUSTY executable
+if [ ! -e $DIR/t205 ]; then
+    echo "ERROR: working dir ($DIR) does not exist or it does not have TLUSTY"
+    exit 1
+fi
+
+# change cwd to $DIR
+cd $DIR
+
+
+# --- test if there is anything to be done (ring is converged already)
+./ring-result >/dev/null 2>/dev/null
+if [ $? -eq 0 ]; then
+    echo "ring OK ... skipping"
+    exit 0
+fi
+
+
+
+# --- setup parameters
+rm -f fort.* 
+TEMP=$(cat ../param-T)
+GRAV=$(cat ../param-Q)
+SIGM=$(cat ../param-S)
+MODEL_LTE="T"
+MODEL_LTEGRAY="T"
+FREQ_POINTS=200
+MAXITER=1
+
+
+# --- setup init file (UNIT 1 and 5)
+rm -f stage1-init
+echo 1 > fort.1
+echo "0.0000  $TEMP  $GRAV  $SIGM" >> stage1-init
+echo "$MODEL_LTE  $MODEL_LTEGRAY" >> stage1-init
+echo "'stage1-options'   'fort'" >> stage1-init
+echo "$FREQ_POINTS" >> stage1-init
+cat t205-atomicdata >> stage1-init
+echo "0.0000  $TEMP  $GRAV  $SIGM" >> stage1-init
+cp stage1-init fort.5
+
+
+
+# --- setup init options file
+rm -f stage1-options
+echo "ALPHAV=0.100,NFTAIL=-41,DFTAIL=0.15,NITZER=11" >> stage1-options
+echo "ICOMPT=7,ICOMST=0,IACC=14,ITEK=40,IPFREC=0" >> stage1-options
+
+
+
+# --- run TLUSTY
+# first, run with gray model anzatz
+nice -n 15 ./t205 < stage1-init > fort.6 2>fort.err
+
+# second, run again providing first run result as an input gray model
+sed -i 's/T  T/T  F/g' stage1-init
+cp stage1-init fort.5
+cp fort.7 fort.8
+nice -n 15 ./t205 < stage1-init > fort.6 2>fort.err
+
+
+
+./ring-result > results
+if [ $? -ne 0 ]; then
+    echo "NO CONVERGENCE"
+    exit 1
+fi
+
+
+
+exit 0
+
+

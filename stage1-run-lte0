@@ -1,0 +1,21 @@
+#!/bin/bash
+
+DIR=$1
+if [ "$DIR" == "" ]; then
+    echo "Usage: $0 <directory>"
+    exit 1
+fi
+
+if [ ! -e $DIR/index.dat ]; then
+    echo "Cannot find index.dat in directory $DIR"
+    exit 1
+fi
+
+
+echo "Running: $DIR:"
+
+for i in `ls -d $DIR/????`; do
+    echo $i
+    $i/stage1/ring-st1-calc-lte >/dev/null &
+    sleep 1
+done

@@ -15,3 +15,5 @@
 !/plots/*.py
 
 /tmp
+/x*
+/*.dat

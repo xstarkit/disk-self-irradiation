@@ -1,0 +1,9 @@
+#!/bin/bash
+
+DIR=$1
+echo "Running: $DIR:"
+
+for i in `ls -d $DIR/????`; do
+    $i/ring-stage1-lteg &
+    #sleep 1
+done

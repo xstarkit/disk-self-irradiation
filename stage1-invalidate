@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo "NaN" > $1/stage1.15

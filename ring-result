@@ -1,0 +1,127 @@
+#!/usr/bin/python
+
+"""
+this scripts analyses output from TLUSTY and collects all important quantities
+output: total flux, eff. temperature, total column mass, disk height
+
+OUTPUT:
+  results are printed to stdout
+
+EXIT CODE:
+  exit code is 0 for converged rings (no errors found); exit code is 1 othervise
+"""
+
+import os
+import sys
+import math
+import numpy as np
+import scipy
+from os import listdir
+from scipy import integrate
+from scipy.integrate import simps
+from collections import OrderedDict
+
+
+def xformat(value):
+    if isinstance(value, (int, long)):
+        return "%d" % value
+    elif isinstance(value, float):
+        return "%E" % value
+    else:
+        return str(value)
+# end of xformat
+
+
+
+
+
+
+script_name = os.path.abspath(__file__)
+script_path = os.path.dirname(script_name)
+
+result = OrderedDict({'converged': 0})
+
+
+
+
+work_dir = sys.argv[1] if (len(sys.argv) >= 2) else script_path
+
+
+# tests
+if (work_dir is None) or not os.path.isdir(work_dir):
+    print "no target directory ({})".format(work_dir)
+    exit()
+
+
+    
+try:
+    # read module.5 to get input parameters
+    mod5 = open(work_dir+'/fort.5', 'r').readlines();
+    mod5_params = mod5[0].strip().split();
+    mod5_modes  = mod5[1].strip().split();
+
+    result['target_temp']    = float(mod5_params[1]);
+    result['target_flux']    = 5.670400e-05*pow(result['target_temp'],4)
+    result['target_sigma']   = float(mod5_params[3]);
+    result['target_gravity'] = float(mod5_params[2]);
+    result['target_height']  = float(open(work_dir+'/../param-H','r').read());
+    
+
+
+    # module.13 read specific intensities and calculate resulting effective temperature
+    if os.path.isfile(work_dir+'/fort.15'): mod13 = open(work_dir+'/fort.13', 'r');
+    arr_f = []; arr_i = []
+    for line in (x for x in mod13 if not x.startswith('#')):
+        values = line.strip().replace("D","E").split()
+        arr_f.append(float(values[0]))
+        arr_i.append(float(values[1]))
+    if (arr_f[0] > arr_f[1]): arr_f.reverse(); arr_i.reverse()  # reverse order of values if necessary
+    mod13_flux = 4*np.pi*integrate.simps(arr_i,arr_f)
+    mod13.close()
+
+    # from module.15 read specific intensities and calculate resulting effective temperature
+    if os.path.isfile(work_dir+'/fort.15'): mod15 = open(work_dir+'/fort.15', 'r');
+    arr_f = []; arr_i = []
+    for line in (x for x in mod15 if not x.startswith('#')):
+        if 'NaN' in line: raise Exception("mod15 contains NaNs")
+        values = line.strip().split()
+        arr_f.append(float(values[0]))
+        arr_i.append(float(values[1]))
+    if (arr_f[0] > arr_f[1]): arr_f.reverse(); arr_i.reverse()  # reverse order of values if necessary
+    mod15_flux = integrate.simps(arr_i,arr_f)
+    mod15.close()
+    
+    # from module.98 read total column density
+    if os.path.isfile(work_dir+'/fort.98'): mod98 = open(work_dir+'/fort.98', 'r').readlines();
+    depth0 = mod98[ 0].strip().replace("D","E").split()
+    depthN = mod98[-2].strip().replace("D","E").split()
+    mod98_colmass = float(depthN[1])
+    mod98_zheight = float(depth0[2])/1.47703573e+6 # scale to grav.radius units (1.47703573e+6 = GM/c^2 for M=10 in cm)
+    
+    result['flux']  = mod15_flux  # integrate Iv to obtain total flux
+    result['flux_mod13']  = mod13_flux  # integrate Iv to obtain total flux
+    result['flux_mod15']  = mod15_flux  # integrate Iv to obtain total flux
+    result['flux_check'] = int((abs(mod15_flux-mod13_flux) / mod13_flux) < 1e-2)
+    result['temp']  = math.pow(result['flux']/5.670400e-05, 0.25);  # from flux get temperature
+    result['sigma'] = mod98_colmass
+    result['height'] = mod98_zheight
+    result['delta_temp'] = abs(result['temp']-result['target_temp']) / result['target_temp'] 
+    result['delta_sigma'] = abs(result['sigma']-result['target_sigma']) / result['target_sigma'] 
+    result['delta_height'] = abs(result['height']-result['target_height']) / result['target_height'] 
+    
+    result['converged'] = 1
+except:
+    error = '!! Error reading tlusty results in '+work_dir+': ' + str(sys.exc_info()[1])
+    sys.stderr.write(error+'\n')
+    print('# '+error)
+    result['converged'] = 0
+
+
+# print out content of result in key=value format
+for key, value in result.items(): print key+'='+xformat(value)
+
+
+
+sys.exit( 0 if (result['converged']==1) else 1 )
+
+

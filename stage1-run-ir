@@ -1,0 +1,15 @@
+#!/bin/bash
+
+DIR=$1
+BDIR=$(pwd)
+
+echo $DIR
+
+for i in `ls -d $DIR/0*`; do
+    cd $BDIR/$i
+    echo "$i - $(pwd)"
+    ./run-lte-ir &
+    cd $BDIR
+    
+    sleep 1
+done
