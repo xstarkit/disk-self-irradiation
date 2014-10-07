@@ -1,5 +1,10 @@
 /data
 
+/disk/*
+!/disk/Makefile
+!/disk/*.c
+!/disk/*.h
+
 /tlusty/*
 !/tlusty/t205*.f
 !/tlusty/data
@@ -8,3 +13,5 @@
 /plots/*
 !/plots/*.asy
 !/plots/*.py
+
+/tmp
