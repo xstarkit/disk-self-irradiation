@@ -1,0 +1,104 @@
+*
+* data for atoms
+*
+      28
+    2   0   0
+    2   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    2   0   0
+    2   0   0
+    2   0   0
+    0   0   0
+    2   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    0   0   0
+    2   0   0
+    0   0   0
+    0   0   0
+* data for ions
+*
+*iat    iz   nlevs  ilast ilvlin  nonstd typion  filei
+*
+   1     0     9      0     20      0    ' H 1' 'data/h1.dat'
+   1     1     1      1      0      0    ' H 2' ' '
+   2     0     1      0     20      0    'He 1' 'data/he1.dat'
+   2     1     4      0     20      0    'He 2' 'data/he2.dat'
+   2     2     1      1      0      0    'He 3' ' '
+   6     0     1      0      0      0    'c1  ' 'data/c1'
+   6     1     1      0      0      0    'c2  ' 'data/c2'
+   6     2     1      0      0      0    'c3  ' 'data/c3'
+   6     3     1      0      0      0    'c4  ' 'data/c4'
+   6     4     1      0      0      0    'c5  ' 'data/c5'
+   6     5     1      0      0      0    'c6  ' 'data/hg1'
+   6     6     1      1      0      0    'c7  ' ' '
+   7     0     1      0      0      0    'n1  ' 'data/n1'
+   7     1     1      0      0      0    'n2  ' 'data/n2'
+   7     2     1      0      0      0    'n3  ' 'data/n3'
+   7     3     1      0      0      0    'n4  ' 'data/n4'
+   7     4     1      0      0      0    'n5  ' 'data/n5'
+   7     5     1      0      0      0    'n6  ' 'data/n6'
+   7     6     1      0      0      0    'n7  ' 'data/hg1'
+   7     7     1      1      0      0    'n8  ' ' '
+   8     0     1      0      0      0    'o1  ' 'data/o1'
+   8     1     1      0      0      0    'o2  ' 'data/o2'
+   8     2     1      0      0      0    'o3  ' 'data/o3'
+   8     3     1      0      0      0    'o4  ' 'data/o4'
+   8     4     1      0      0      0    'o5  ' 'data/o5'
+   8     5     1      0      0      0    'o6  ' 'data/o6'
+   8     6     1      0      0      0    'o7  ' 'data/o7'
+   8     7     1      0      0      0    'o8  ' 'data/hg1'
+   8     8     1      1      0      0    'o9  ' ' '
+  10     0     1      0      0      0    'ne1 ' 'data/ne1'
+  10     1     1      0      0      0    'ne2 ' 'data/ne2'
+  10     2     1      0      0      0    'ne3 ' 'data/ne3'
+  10     3     1      0      0      0    'ne4 ' 'data/ne4'
+  10     4     1      0      0      0    'ne5 ' 'data/ne5'
+  10     5     1      0      0      0    'ne6 ' 'data/ne6'
+  10     6     1      0      0      0    'ne7 ' 'data/ne7'
+  10     7     1      0      0      0    'ne8 ' 'data/ne8'
+  10     8     1      0      0      0    'ne9 ' 'data/ne9'
+  10     9     1      0      0      0    'ne10' 'data/hg1'
+  10    10     1      1      0      0    'ne11' ' '
+  26     0     1      0      0      0    'fe1 ' 'data/fe1'
+  26     1     1      0      0      0    'fe2 ' 'data/fe2'
+  26     2     1      0      0      0    'fe3 ' 'data/fe3'
+  26     3     1      0      0      0    'fe4 ' 'data/fe4'
+  26     4     1      0      0      0    'fe5 ' 'data/fe5'
+  26     5     1      0      0      0    'fe6 ' 'data/fe6'
+  26     6     1      0      0      0    'fe7 ' 'data/fe7'
+  26     7     1      0      0      0    'fe8 ' 'data/fe8'
+  26     8     1      0      0      0    'fe9 ' 'data/fe9'
+  26     9     1      0      0      0    'fe10' 'data/fe10'
+  26    10     1      0      0      0    'fe11' 'data/fe11'
+  26    11     1      0      0      0    'fe12' 'data/fe12'
+  26    12     1      0      0      0    'fe13' 'data/fe13'
+  26    13     1      0      0      0    'fe14' 'data/fe14'
+  26    14     1      0      0      0    'fe15' 'data/fe15'
+  26    15     1      0      0      0    'fe16' 'data/fe16'
+  26    16     1      0      0      0    'fe17' 'data/fe17'
+  26    17     1      0      0      0    'fe18' 'data/fe18'
+  26    18     1      0      0      0    'fe19' 'data/fe19'
+  26    19     1      0      0      0    'fe20' 'data/fe20'
+  26    20     1      0      0      0    'fe21' 'data/fe21'
+  26    21     1      0      0      0    'fe22' 'data/fe22'
+  26    22     1      0      0      0    'fe23' 'data/fe23'
+  26    23     1      0      0      0    'fe24' 'data/fe24'
+  26    24     1      0      0      0    'fe25' 'data/fe25'
+  26    25     1      0      0      0    'fe26' 'data/hg1'
+  26    26     1      1      0      0    'fe27' ' '
+   0     0     0     -1      0      0    '    ' ' '
