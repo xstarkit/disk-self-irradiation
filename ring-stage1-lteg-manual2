@@ -1,0 +1,63 @@
+#!/bin/bash
+
+SRCMODELDIR=$1
+
+if [ "$SRCMODELDIR" == "" ]; then
+    echo "Specify src dir"
+    exit 0
+fi
+
+if [ ! -e $SRCMODELDIR ]; then
+    echo "Invalid src dir"
+    exit 0
+fi
+
+cd "$(dirname "$0")"
+
+if [ -e stage1.15 ] && [ $(cat stage1.15 | grep NaN | wc -l) -eq "0" ]; then 
+    echo "$(dirname "$0") OK ... skipping"
+    exit 0
+fi
+
+
+SRCTEMP=$(cat $SRCMODELDIR/param-T)
+SRCGRAV=$(cat $SRCMODELDIR/param-Q)
+SRCSIGM=$(cat $SRCMODELDIR/param-S)
+
+TEMP=$(cat param-T)
+GRAV=$(cat param-Q)
+SIGM=$(cat param-S)
+
+
+rm -f fort.* stage1.*
+echo 1 > fort.1
+cp $SRCMODELDIR/stage1.7 ./stage1.7
+
+for W in 0.01 0.02 0.05 0.1 0.2 0.4 0.6 0.8 0.9 1.0; do
+    CURRENT_TEMP=$(perl -e "printf('%.5e',$SRCTEMP*(1.0-$W) + $TEMP*$W)")
+    CURRENT_GRAV=$(perl -e "printf('%.5e',$SRCGRAV*(1.0-$W) + $GRAV*$W)")
+    CURRENT_SIGM=$(perl -e "printf('%.5e',$SRCSIGM*(1.0-$W) + $SIGM*$W)")
+    echo "W:$W   T:$CURRENT_TEMP/$TEMP   T:$CURRENT_GRAV/$GRAV   T:$CURRENT_SIGM/$SIGM"
+
+    cp run.5.skeleton stage1.5
+    sed -i s/%TEMP%/$CURRENT_TEMP/g stage1.5
+    sed -i s/%GRAV%/$CURRENT_GRAV/g stage1.5
+    sed -i s/%SIGM%/$CURRENT_SIGM/g stage1.5
+    sed -i s/%LTE%/T/g stage1.5
+    sed -i s/%LTEGRAY%/F/g stage1.5
+    sed -i s/%PARAMS%/\'stage1.5.params\'/g stage1.5
+    sed -i s/%OUTPUT%/\'stage1\'/g stage1.5
+
+    cp run.params.skeleton stage1.5.params
+    sed -i s/%PARAMS%//g stage1.5.params
+
+    cp stage1.7 fort.8
+    ./t205 < stage1.5 > stage1.6 2>stage1.err
+    LANG= rename -f 's/fort/stage1/' fort.*
+
+    if [ ! -e stage1.15 ] || [ $(cat stage1.15 | grep NaN | wc -l) -ne "0" ]; then 
+        echo "NO CONVERGENCE"
+        exit 0
+    fi
+done
+

@@ -1,0 +1,97 @@
+#!/bin/bash
+
+cd "$(dirname "$0")"
+REV=0
+test "$1" == "1" && REV=1
+
+# determine current, previous and next ring folder
+THISID=$(basename `pwd` | sed -e 's/0\+//')
+PREVID=$(printf "%04d" $(($THISID - 1)))
+NEXTID=$(printf "%04d" $(($THISID + 1)))
+
+if [ $REV -eq "0" ]; then
+    PREVID=$NEXTID
+fi
+
+#echo "$(pwd) $PREVID"
+#sleep 5
+#exit
+
+#if [ ! -e stage.15 ]; then
+#    echo "$THISID: no fort.15 file - run LTE first"
+#    exit 1
+#fi
+#
+#NAN=$(cat fort.15 | grep NaN | wc -l)
+#if [ $NAN -eq "0" ]; then exit; fi
+#test $NAN -eq "0" && (exit 1)
+#
+#if [ -e stage1.15 ] && [ `grep "NaN" stage1.15 |wc -l` -eq 0 ]; then
+#    echo "Ring $(basename `pwd`) seem to be converged ... skipping"
+#    exit 1
+#fi
+
+
+if [ $(cat ../$PREVID/stage1.15|grep NaN|wc -l) -ne "0" ]; then 
+    echo "$THISID: NO CONVERGENCE CAN BE REACHED"
+    exit 0
+fi
+
+
+# ----- round one ------------------
+
+TEMP=$(cat ../$PREVID/param-T)
+GRAV=$(cat param-Q)
+SIGM=$(cat param-S)
+
+cp run.5.skeleton stage1.5
+sed -i s/%TEMP%/$TEMP/g stage1.5
+sed -i s/%GRAV%/$GRAV/g stage1.5
+sed -i s/%SIGM%/$SIGM/g stage1.5
+sed -i s/%LTE%/T/g stage1.5
+sed -i s/%LTEGRAY%/F/g stage1.5
+sed -i s/%PARAMS%/\'stage1.5.params\'/g stage1.5
+sed -i s/%OUTPUT%/\'stage1\'/g stage1.5
+
+cp run.params.skeleton stage1.5.params
+sed -i s/%PARAMS%//g stage1.5.params
+
+echo "$THISID: running lte-gray on $(basename `pwd`) from $PREVID - phase 1"
+echo 1 > fort.1
+cp ../$PREVID/stage1.7 ./fort.8
+./t205 < stage1.5 > stage1.6 2>stage1.err
+
+if [ $(cat stage1.15|grep NaN|wc -l) -ne "0" ]; then 
+    echo "$THISID: NO CONVERGENCE CAN BE REACHED"
+    exit 0
+fi
+
+
+# ----- round two ------------------
+
+TEMP=$(cat param-T)
+GRAV=$(cat param-Q)
+SIGM=$(cat param-S)
+
+cp run.5.skeleton stage1.5
+sed -i s/%TEMP%/$TEMP/g stage1.5
+sed -i s/%GRAV%/$GRAV/g stage1.5
+sed -i s/%SIGM%/$SIGM/g stage1.5
+sed -i s/%LTE%/T/g stage1.5
+sed -i s/%LTEGRAY%/F/g stage1.5
+sed -i s/%PARAMS%/\'stage1.5.params\'/g stage1.5
+sed -i s/%OUTPUT%/\'stage1\'/g stage1.5
+
+cp run.params.skeleton stage1.5.params
+sed -i s/%PARAMS%//g stage1.5.params
+
+echo "$THISID: running lte-gray on $(basename `pwd`) from $PREVID - phase 2"
+echo 1 > fort.1
+cp ./stage1.7 ./fort.8
+./t205 < stage1.5 > stage1.6 2>stage1.err
+
+if [ $(cat stage1.15|grep NaN|wc -l) -ne "0" ]; then 
+    echo "$THISID: NO CONVERGENCE CAN BE REACHED"
+    exit 0
+fi
+
