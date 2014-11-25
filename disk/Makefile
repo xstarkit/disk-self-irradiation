@@ -3,10 +3,11 @@
 
 
 CC = gcc
-SDLIB = /home/bursa/projects/slimdisk
-SIM5LIB = /home/bursa/sim5/lib
+#SDLIB = /home/bursa/projects/slimdisk
+SIM5LIB = /home/bursa/projects/sim5/lib2
 
-CFLAGS = -I$(SDLIB) -I$(SIM5LIB) -L$(SDLIB) -Wall -O3 
+#CFLAGS = -I$(SDLIB) -I$(SIM5LIB) -L$(SDLIB) -Wall -O3  
+CFLAGS = -I$(SIM5LIB) -L$(SIM5LIB) -Wall -O3 -w
 LFLAGS = $(CFLAGS) -lm -ldl -lgsl -lgslcblas
 
 
@@ -15,7 +16,7 @@ default: sd-radial-model
 
 # compile object files as a "position independent code" 
 %.o: %.c
-	$(CC) $(CFLAGS) -fpic -c -o $@ $<
+	$(CC) $< $(CFLAGS) -fpic -c -o $@
 
 clean:
 	rm -f *.o
@@ -29,7 +30,7 @@ sd-radial-model-src = \
 sd-radial-model-obj = $(sd-radial-model-src:.c=.o)
 
 sd-radial-model: $(sd-radial-model-obj)
-	$(CC) $(LFLAGS) -o $@ $(sd-radial-model-obj)
+	$(CC) $(sd-radial-model-obj) $(LFLAGS) -o $@ 
 
 
 
@@ -42,5 +43,22 @@ sd-opacity-obj = $(sd-opacity-src:.c=.o)
 
 sd-opacity: $(sd-opacity-obj)
 	$(CC) $(LFLAGS) -o $@ $(sd-opacity-obj)
+
+
+
+
+
+
+disk-model-src = \
+    $(SIM5LIB)/sim5lib.c \
+    disk-model.c
+
+disk-model-obj = $(disk-model-src:.c=.o)
+
+disk-model: $(disk-model-obj)
+	$(CC) $(disk-model-obj) $(LFLAGS) -o $@ 
+
+
+
 
 
