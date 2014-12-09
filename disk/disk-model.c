@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     nRS = nrad*100;
     RS  = (radial_structure*) calloc(nRS, sizeof(radial_structure));
 
-    disk_nt_setup(M, a, lum, alpha, 0);
+    disk_nt_setup(M, a, lum, alpha, DISK_NT_OPTION_LUMINOSITY);
     rmin = disk_nt_r_min();
 
     fprintf(stdout, "# radial disk structure model\n");
@@ -66,6 +66,8 @@ int main(int argc, char *argv[])
     fprintf(stdout, "# N_rad: %d\n", nrad);
     fprintf(stdout, "# model mdot: %e\n", disk_nt_mdot());
     fprintf(stdout, "# model lumi: %e\n", disk_nt_lum());
+    fprintf(stdout, "# format: ring-ID, radius [rg], temp [K], col.density [g/cm2], vert.grav. [?], vert.height [rg], spec.ang.mom. [], rad.velocity [c]\n");
+    
 
     // evaluate local model parameters at r=r0
     int ir;
@@ -109,35 +111,30 @@ int main(int argc, char *argv[])
         RS[ir].Q = M*solar_mass*grav_const/pow(RS[ir].R*M*grav_radius,3.) * (sqr(u_f) + a*a*(u_t-1.))/RS[ir].R;
     }
 
-    fprintf(stderr, "L0: %e / %.3f\n", RS[nRS-1].totL, log(RS[nRS-1].totL));
-    fprintf(stderr, "L1: %e / %.3f\n", RS[1].totL, log(RS[1].totL));
-    double dL = (RS[nRS-2].totL-RS[1].totL);
-    fprintf(stderr, "Lmax=%.3f dL: %.3f\n", (RS[nRS-2].totL-RS[1].totL), dL);
+    double dL = (RS[nRS-1].totL-RS[1].totL);
     int ID;
     double prevL, prevR;
-
 
     do {
         dL /= 1.1;
         ID = 0;
         prevL = prevR = 0.0;
         for (ir=0; ir<nRS; ir++) {
-        if ((ir==0) || (ir==nRS-1) || ((RS[ir].totL-prevL >= dL)&&(RS[ir].R-prevR>0.2)) || ((RS[ir].R-prevR)/RS[ir].R>0.5)) { 
+            if ((ir==0) || (ir==nRS-1) || ((RS[ir].totL-prevL >= dL)&&((RS[ir].R-prevR)/RS[ir].R>0.01)) || ((RS[ir].R-prevR)/RS[ir].R>0.5)) { 
                 ID++;
                 prevL = RS[ir].totL;
                 prevR = RS[ir].R;
             }
         }
-        fprintf(stderr, "dL= %e  %d/%d\n", ID, nrad);
-    } while (ID!=nrad);
+    } while (ID<=nrad);
 
     ID = 0;
     prevL = prevR = 0.0;
     for (ir=0; ir<nRS; ir++) {
-        if ((ir==0) || (ir==nRS-1) || ((RS[ir].totL-prevL >= dL)&&(RS[ir].R-prevR>0.2)) || ((RS[ir].R-prevR)/RS[ir].R>0.3)) { 
+        if ((ir==0) || (ir==nRS-1) || ((RS[ir].totL-prevL >= dL)&&((RS[ir].R-prevR)/RS[ir].R>0.01)) || ((RS[ir].R-prevR)/RS[ir].R>0.5)) { 
             fprintf(
-                stdout, "%04d/%04d  %.2e  %.4e    %e    %e    %e    %e    %e    %e\n", 
-                ID+1, ir, RS[ir].totL, RS[ir].R, RS[ir].T, RS[ir].S, RS[ir].Q, RS[ir].H, RS[ir].l, RS[ir].V
+                stdout, "%04d  %.2e  %.4e    %e    %e    %e    %e    %e    %e\n", 
+                ID+1, RS[ir].R, RS[ir].T, RS[ir].S, RS[ir].Q, RS[ir].H, RS[ir].l, RS[ir].V
             );
             ID++;
             prevL = RS[ir].totL;

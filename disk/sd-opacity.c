@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     int    nrad  = atoi(argv[5]);     // number of rings
 
     // initialize flux model
-    flux_model_init("./flux-sd.so", M, a, lum, alpha, NULL, SD_INIT_OPT_LUMINOSITY);
+    flux_model_init("./flux-nt.so", M, a, lum, alpha, NULL, SD_INIT_OPT_LUMINOSITY);
 
     int ir;
     for (ir=0; ir<nrad; ir++) {
